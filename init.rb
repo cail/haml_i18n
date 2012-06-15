@@ -69,25 +69,25 @@ if defined? Haml
     #
     # Inject translate into plain text and tag plain text calls
     #
-    def push_plain(text)
+    def plain(text)
       if have_translation(text)
-        push_script "translate('#{text.gsub(/'/, '\\\'')}')"
+        script "translate('#{text.gsub(/'/, '\\\'')}')"
       else
         super(text)
       end
     end
 
     def parse_tag(line)
-      tag_name, attributes, attributes_hash, object_ref, nuke_outer_whitespace,
-        nuke_inner_whitespace, action, value = super(line)
+      tag_name, attributes, attributes_hashes, object_ref, nuke_outer_whitespace,
+        nuke_inner_whitespace, action, value, last_line = super(line)
       
       if !action and !value.empty? and have_translation(value)
         action = '='
         value = "translate('#{value.gsub(/'/, '\\\'')}')"
       end
 
-      [tag_name, attributes, attributes_hash, object_ref, nuke_outer_whitespace,
-          nuke_inner_whitespace, action, value]
+      [tag_name, attributes, attributes_hashes, object_ref, nuke_outer_whitespace,
+        nuke_inner_whitespace, action, value, last_line]
     end
   end
 end
