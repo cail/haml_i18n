@@ -15,7 +15,7 @@ rescue LoadError => e
 end
 
 if defined? Haml
-  class Haml::Engine
+  class Haml::Parser
 
     def scope_key_by_partial (key)
       prefix = @options[:filename]
@@ -62,24 +62,33 @@ if defined? Haml
           #keys = I18n.send(:normalize_translation_keys, e.locale, e.key, e.options[:scope])
         end
       end
-      # Kernel.puts('Missing translation:' + key.to_s)
+      unless Rails.env.production?
+        Kernel.puts('haml_i18n: Missing translation:' + key.to_s)
+      end
       return false
     end
 
     #
     # Inject translate into plain text and tag plain text calls
     #
+    alias_method :orig_plain, :plain
+
     def plain(text)
       if have_translation(text)
+        #TODO: should we follow here HAML code sequence?
+        #escape_html = @options[:escape_html] if escape_html.nil?
+        #script(unescape_interpolation(text, escape_html), false)
         script "translate('#{text.gsub(/'/, '\\\'')}')"
       else
-        super(text)
+        orig_plain(text)
       end
     end
 
+    alias_method :orig_parse_tag, :parse_tag
+
     def parse_tag(line)
       tag_name, attributes, attributes_hashes, object_ref, nuke_outer_whitespace,
-        nuke_inner_whitespace, action, value, last_line = super(line)
+        nuke_inner_whitespace, action, value, last_line = orig_parse_tag(line)
       
       if !action and !value.empty? and have_translation(value)
         action = '='
