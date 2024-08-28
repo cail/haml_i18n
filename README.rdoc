@@ -9,7 +9,12 @@ raw text has no translation (in any of available locales), it is kept as raw.
 
 == Usage
 
-Install as a plugin, make sure you have i18n environment setup and running,
+Install as a plugin:
+
+1. copy it into `lib/haml_i18n`
+2. add `config/initializers/haml_i18n.rb` with `load 'lib/haml_i18n/init.rb'`
+
+make sure you have i18n environment setup and running,
 in particular 'translate' helper should be available.
 
 Then, any HAML code, like
