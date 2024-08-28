@@ -62,7 +62,7 @@ if defined? Haml
           #keys = I18n.send(:normalize_translation_keys, e.locale, e.key, e.options[:scope])
         end
       end
-      unless Rails.env.production?
+      if Rails.env.development?
         Kernel.puts('haml_i18n: Missing translation:' + key.to_s)
       end
       return false
@@ -73,14 +73,16 @@ if defined? Haml
     #
     alias_method :orig_plain, :plain
 
-    def plain(text)
-      if have_translation(text)
+    def plain(line)
+      if have_translation(line.text)
         #TODO: should we follow here HAML code sequence?
         #escape_html = @options[:escape_html] if escape_html.nil?
         #script(unescape_interpolation(text, escape_html), false)
-        script "translate('#{text.gsub(/'/, '\\\'')}')"
+        #debugger
+        return ParseNode.new(:script, line.index + 1, :text => "translate('#{line.text.to_s.gsub(/'/, '\\\'')}')", :escape_html => @options.escape_html,
+                      :preserve => false)
       else
-        orig_plain(text)
+        orig_plain(line)
       end
     end
 
