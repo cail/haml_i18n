@@ -41,21 +41,17 @@ if defined? Haml
 
       # For the development environment, localize all the resources!
       # For the production - keep plain strings if no localization found.
-      return true if Rails.env == 'development'
 
       for loc in I18n.available_locales
-        opt = {}
-        opt[:raise] = true
-        opt[:locale] = loc
         begin
           begin
             begin
-              I18n.translate(scope_key_by_partial('.' + key.to_s), opt.clone)
+              I18n.translate(scope_key_by_partial('.' + key.to_s), locale: loc, railse: true)
             rescue
-              I18n.translate(view_name('.' + key.to_s), opt.clone)
+              I18n.translate(view_name('.' + key.to_s), locale: loc, railse: true)
             end
           rescue
-            I18n.translate(key, opt.clone)
+            I18n.translate(key, locale: loc, railse: true)
           end
           return true
         rescue
@@ -65,6 +61,7 @@ if defined? Haml
       if Rails.env.development?
         Kernel.puts('haml_i18n: Missing translation:' + key.to_s)
       end
+      #return true if Rails.env == 'development'
       return false
     end
 
