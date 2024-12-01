@@ -18,7 +18,7 @@ if defined? Haml
   class Haml::Parser
 
     def scope_key_by_partial (key)
-      prefix = @options[:filename]
+      prefix = @options.filename
 
       prefix = prefix.gsub(/#{Rails.root}\/app\/views\//, '')
       prefix = prefix.gsub(/\.haml/, '')
@@ -28,7 +28,7 @@ if defined? Haml
     end
 
     def view_name (key)
-      prefix = @options[:filename]
+      prefix = @options.filename
 
       prefix = prefix.gsub(/#{Rails.root}\/app\/views\//, '')
       prefix = prefix.gsub(/\/[^\/]*?\.haml/, '')
@@ -42,26 +42,38 @@ if defined? Haml
       # For the development environment, localize all the resources!
       # For the production - keep plain strings if no localization found.
 
+      # Kernel.puts('haml_i18n: ' + key.to_s)
+
       for loc in I18n.available_locales
+        res = ""
         begin
           begin
             begin
-              I18n.translate(scope_key_by_partial('.' + key.to_s), locale: loc, railse: true)
+              res = I18n.translate(scope_key_by_partial('.' + key.to_s), locale: loc, raise: true)
             rescue
-              I18n.translate(view_name('.' + key.to_s), locale: loc, railse: true)
+              res = I18n.translate(view_name('.' + key.to_s), locale: loc, raise: true)
             end
           rescue
-            I18n.translate(key, locale: loc, railse: true)
+            res = I18n.translate(key, locale: loc, raise: true)
           end
+          
           return true
+
         rescue
           #keys = I18n.send(:normalize_translation_keys, e.locale, e.key, e.options[:scope])
+
+          if Rails.env.development?
+            Kernel.puts('haml_i18n: ' + key.to_s + " (#{scope_key_by_partial('.' + key.to_s)}, #{view_name('.' + key.to_s)})  = " + res)
+          end
+          
         end
       end
+      
       if Rails.env.development?
         Kernel.puts('haml_i18n: Missing translation:' + key.to_s)
+        return true
       end
-      #return true if Rails.env == 'development'
+      
       return false
     end
 
